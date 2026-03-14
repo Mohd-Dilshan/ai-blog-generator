@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - AI Blog Generator</title>
+    <meta name="description" content="{{ meta_description }}">
+    <meta name="keywords" content="{{ keywords }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container result-page">
+        <!-- Header -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>New Blog
+            </a>
+            <div class="logo-small">
+                <i class="bi bi-pencil-square me-2"></i>
+                <span class="fw-semibold">AI Blog Generator</span>
+            </div>
+        </header>
+
+        <!-- SEO Metadata Card -->
+        <div class="card seo-card mb-4">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-search me-2"></i>SEO Metadata
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Title -->
+                    <div class="col-12">
+                        <div class="seo-item">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-type-h1 me-1"></i>SEO Title
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ title }}" id="seoTitle" readonly>
+                                <button class="btn btn-outline-secondary copy-btn" type="button" data-copy="seoTitle">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ title|length }} / 60 characters</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Meta Description -->
+                    <div class="col-12">
+                        <div class="seo-item">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-card-text me-1"></i>Meta Description
+                            </label>
+                            <div class="input-group">
+                                <textarea class="form-control" id="metaDesc" rows="2" readonly>{{ meta_description }}</textarea>
+                                <button class="btn btn-outline-secondary copy-btn" type="button" data-copy="metaDesc">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ meta_description|length }} / 160 characters</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Keywords -->
+                    <div class="col-12">
+                        <div class="seo-item">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-tags me-1"></i>Keywords
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ keywords }}" id="keywords" readonly>
+                                <button class="btn btn-outline-secondary copy-btn" type="button" data-copy="keywords">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Stats -->
+        <div class="stats-bar mb-4">
+            <div class="row g-3">
+                <div class="col-4">
+                    <div class="stat-item text-center">
+                        <i class="bi bi-file-text text-primary"></i>
+                        <div class="stat-value">{{ word_count }}</div>
+                        <div class="stat-label">Words</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-item text-center">
+                        <i class="bi bi-chat-quote text-primary"></i>
+                        <div class="stat-value">{{ tone }}</div>
+                        <div class="stat-label">Tone</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-item text-center">
+                        <i class="bi bi-bullseye text-primary"></i>
+                        <div class="stat-value text-truncate" title="{{ topic }}">{{ topic[:20] }}{% if topic|length > 20 %}...{% endif %}</div>
+                        <div class="stat-label">Topic</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blog Content Card -->
+        <div class="card content-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-file-earmark-text me-2"></i>Generated Blog Content
+                </span>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" id="copyAllBtn">
+                        <i class="bi bi-clipboard me-1"></i>Copy All
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" id="copyMarkdownBtn">
+                        <i class="bi bi-markdown me-1"></i>Copy Markdown
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <article class="blog-content" id="blogContent">
+                    <h1 class="blog-title mb-4">{{ title }}</h1>
+                    <div class="blog-body">
+                        {{ content | safe }}
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <!-- Raw Markdown -->
+        <div class="card raw-card mb-4">
+            <div class="card-header" data-bs-toggle="collapse" data-bs-target="#rawMarkdown" style="cursor: pointer;">
+                <i class="bi bi-code me-2"></i>Raw Markdown
+                <i class="bi bi-chevron-down float-end"></i>
+            </div>
+            <div class="collapse" id="rawMarkdown">
+                <div class="card-body">
+                    <pre class="bg-dark text-light p-3 rounded" id="markdownContent"><code># {{ title }}
+
+{{ content }}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 justify-content-center mb-5">
+            <a href="/" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle me-2"></i>Generate Another
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center pt-4">
+            <p class="text-muted small">
+                Powered by <strong>Groq</strong> &amp; <strong>Llama 3.3 70B</strong>
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Copy individual fields
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-copy');
+                const targetEl = document.getElementById(targetId);
+                const text = targetEl.value || targetEl.textContent;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    const icon = this.querySelector('i');
+                    icon.classList.remove('bi-clipboard');
+                    icon.classList.add('bi-check-lg');
+                    
+                    setTimeout(() => {
+                        icon.classList.remove('bi-check-lg');
+                        icon.classList.add('bi-clipboard');
+                    }, 2000);
+                });
+            });
+        });
+
+        // Copy all content
+        document.getElementById('copyAllBtn').addEventListener('click', function() {
+            const title = document.getElementById('seoTitle').value;
+            const content = document.getElementById('blogContent').innerText;
+            
+            navigator.clipboard.writeText(title + '\n\n' + content).then(() => {
+                this.innerHTML = '<i class="bi bi-check-lg me-1"></i>Copied!';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="bi bi-clipboard me-1"></i>Copy All';
+                }, 2000);
+            });
+        });
+
+        // Copy markdown
+        document.getElementById('copyMarkdownBtn').addEventListener('click', function() {
+            const markdown = document.getElementById('markdownContent').textContent;
+            
+            navigator.clipboard.writeText(markdown).then(() => {
+                this.innerHTML = '<i class="bi bi-check-lg me-1"></i>Copied!';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="bi bi-markdown me-1"></i>Copy Markdown';
+                }, 2000);
+            });
+        });
+
+        // Format markdown content in blog body
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogBody = document.querySelector('.blog-body');
+            let content = blogBody.innerHTML;
+            
+            // Convert markdown headers to HTML
+            content = content.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            content = content.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            content = content.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // Convert bold and italic
+            content = content.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Convert bullet points
+            content = content.replace(/^\- (.*$)/gim, '<li>$1</li>');
+            content = content.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            
+            // Convert numbered lists
+            content = content.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
+            
+            // Convert line breaks to paragraphs
+            content = content.split('\n\n').map(p => {
+                if (!p.startsWith('<h') && !p.startsWith('<ul') && !p.startsWith('<ol') && !p.startsWith('<li') && p.trim()) {
+                    return '<p>' + p + '</p>';
+                }
+                return p;
+            }).join('');
+            
+            blogBody.innerHTML = content;
+        });
+    </script>
+</body>
+</html>

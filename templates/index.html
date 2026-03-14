@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blog Generator - Powered by Llama 3.3</title>
+    <meta name="description" content="Generate high-quality, SEO-optimized blog posts instantly using AI. Powered by Groq and Llama 3.3 70B.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <header class="text-center mb-5">
+            <div class="logo-container mb-3">
+                <i class="bi bi-pencil-square logo-icon"></i>
+            </div>
+            <h1 class="display-5 fw-bold text-gradient">AI Blog Generator</h1>
+            <p class="lead text-muted">Create SEO-optimized blog posts in seconds with Llama 3.3 70B</p>
+        </header>
+
+        <!-- Error Alert -->
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <!-- Main Form Card -->
+        <div class="card form-card">
+            <div class="card-body p-4 p-md-5">
+                <form action="/generate" method="POST" id="blogForm">
+                    <!-- Topic Input -->
+                    <div class="mb-4">
+                        <label for="topic" class="form-label fw-semibold">
+                            <i class="bi bi-lightbulb me-2"></i>Blog Topic
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control form-control-lg" 
+                            id="topic" 
+                            name="topic" 
+                            placeholder="e.g., 10 Tips for Productive Remote Work"
+                            required
+                            maxlength="200"
+                        >
+                        <div class="form-text">Enter a specific topic or title idea for your blog post</div>
+                    </div>
+
+                    <!-- Tone Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-chat-quote me-2"></i>Writing Tone
+                        </label>
+                        <div class="tone-grid">
+                            <div class="tone-option">
+                                <input type="radio" class="btn-check" name="tone" id="professional" value="professional" checked>
+                                <label class="btn tone-btn" for="professional">
+                                    <i class="bi bi-briefcase"></i>
+                                    <span>Professional</span>
+                                </label>
+                            </div>
+                            <div class="tone-option">
+                                <input type="radio" class="btn-check" name="tone" id="casual" value="casual">
+                                <label class="btn tone-btn" for="casual">
+                                    <i class="bi bi-emoji-smile"></i>
+                                    <span>Casual</span>
+                                </label>
+                            </div>
+                            <div class="tone-option">
+                                <input type="radio" class="btn-check" name="tone" id="technical" value="technical">
+                                <label class="btn tone-btn" for="technical">
+                                    <i class="bi bi-code-slash"></i>
+                                    <span>Technical</span>
+                                </label>
+                            </div>
+                            <div class="tone-option">
+                                <input type="radio" class="btn-check" name="tone" id="creative" value="creative">
+                                <label class="btn tone-btn" for="creative">
+                                    <i class="bi bi-palette"></i>
+                                    <span>Creative</span>
+                                </label>
+                            </div>
+                            <div class="tone-option">
+                                <input type="radio" class="btn-check" name="tone" id="persuasive" value="persuasive">
+                                <label class="btn tone-btn" for="persuasive">
+                                    <i class="bi bi-megaphone"></i>
+                                    <span>Persuasive</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Word Count Slider -->
+                    <div class="mb-4">
+                        <label for="word_count" class="form-label fw-semibold">
+                            <i class="bi bi-text-paragraph me-2"></i>Target Word Count: <span id="wordCountDisplay" class="text-primary">800</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            class="form-range custom-range" 
+                            id="word_count" 
+                            name="word_count" 
+                            min="300" 
+                            max="2000" 
+                            step="100" 
+                            value="800"
+                        >
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>300 words</span>
+                            <span>2000 words</span>
+                        </div>
+                    </div>
+
+                    <!-- SEO Features Info -->
+                    <div class="seo-info mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-search me-2 text-success"></i>
+                            <span class="fw-semibold">SEO Optimization Included</span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-auto">
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i>SEO Title
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i>Meta Description
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i>Keywords
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-lg w-100 generate-btn" id="generateBtn">
+                        <span class="btn-text">
+                            <i class="bi bi-magic me-2"></i>Generate Blog Post
+                        </span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Generating...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section mt-5">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <h5 class="fw-semibold">Lightning Fast</h5>
+                        <p class="text-muted small mb-0">Generate complete blog posts in seconds with Groq's ultra-fast inference</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h5 class="fw-semibold">SEO Optimized</h5>
+                        <p class="text-muted small mb-0">Get titles, meta descriptions, and keywords optimized for search engines</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-sliders"></i>
+                        </div>
+                        <h5 class="fw-semibold">Customizable</h5>
+                        <p class="text-muted small mb-0">Choose from 5 writing tones and adjust word count to fit your needs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-5 pt-4">
+            <p class="text-muted small">
+                Powered by <strong>Groq</strong> &amp; <strong>Llama 3.3 70B</strong>
+                <br>
+                <span class="text-muted">Built for Hugging Face Spaces</span>
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Word count slider display
+        const wordCountSlider = document.getElementById('word_count');
+        const wordCountDisplay = document.getElementById('wordCountDisplay');
+        
+        wordCountSlider.addEventListener('input', function() {
+            wordCountDisplay.textContent = this.value;
+        });
+
+        // Form submission loading state
+        const form = document.getElementById('blogForm');
+        const generateBtn = document.getElementById('generateBtn');
+        
+        form.addEventListener('submit', function() {
+            generateBtn.disabled = true;
+            generateBtn.querySelector('.btn-text').classList.add('d-none');
+            generateBtn.querySelector('.btn-loading').classList.remove('d-none');
+        });
+    </script>
+</body>
+</html>
